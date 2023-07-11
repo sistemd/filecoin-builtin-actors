@@ -59,13 +59,13 @@ members = [
 ]
 
 [patch.crates-io]
-#fvm_shared = { git = "https://github.com/filecoin-project/ref-fvm", branch = "master" }
-#fvm_sdk = { git = "https://github.com/filecoin-project/ref-fvm", branch = "master" }
-#fvm_ipld_hamt = { git = "https://github.com/filecoin-project/ref-fvm", branch = "master" }
-#fvm_ipld_amt = { git = "https://github.com/filecoin-project/ref-fvm", branch = "master" }
-#fvm_ipld_bitfield = { git = "https://github.com/filecoin-project/ref-fvm", branch = "master" }
-#fvm_ipld_encoding = { git = "https://github.com/filecoin-project/ref-fvm", branch = "master" }
-#fvm_ipld_blockstore = { git = "https://github.com/filecoin-project/ref-fvm", branch = "master" }
+fvm_shared = { git = "https://github.com/filecoin-project/ref-fvm", branch = "next" }
+fvm_sdk = { git = "https://github.com/filecoin-project/ref-fvm", branch = "next" }
+fvm_ipld_hamt = { git = "https://github.com/filecoin-project/ref-fvm", branch = "next" }
+fvm_ipld_amt = { git = "https://github.com/filecoin-project/ref-fvm", branch = "next" }
+fvm_ipld_bitfield = { git = "https://github.com/filecoin-project/ref-fvm", branch = "next" }
+fvm_ipld_encoding = { git = "https://github.com/filecoin-project/ref-fvm", branch = "next" }
+fvm_ipld_blockstore = { git = "https://github.com/filecoin-project/ref-fvm", branch = "next" }
 #fvm_actor_utils = { git = "https://github.com/helix-onchain/filecoin", branch = "main" }
 #frc42_dispatch = { git = "https://github.com/helix-onchain/filecoin", branch = "main" }
 #frc46_token = { git = "https://github.com/helix-onchain/filecoin", branch = "main" }
