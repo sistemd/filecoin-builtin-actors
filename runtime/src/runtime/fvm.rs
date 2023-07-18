@@ -568,6 +568,8 @@ where
 /// 4.  Invokes the target method.
 /// 5a. In case of error, aborts the execution with the emitted exit code, or
 /// 5b. In case of success, stores the return data as a block and returns the latter.
+// TODO This needs to change so I can use it with both invoke and create. I should probably make
+// this accept a closure and then call the let method = and let params = part myself.
 pub fn trampoline<C: ActorCode>(params: u32) -> u32 {
     init_logging(C::name());
 
@@ -581,7 +583,7 @@ pub fn trampoline<C: ActorCode>(params: u32) -> u32 {
     // Construct a new runtime.
     let rt = FvmRuntime::default();
     // Invoke the method, aborting if the actor returns an errored exit code.
-    let ret = C::invoke_method(&rt, method, params).unwrap_or_else(|mut err| {
+    let ret = C::invoke(&rt, method, params).unwrap_or_else(|mut err| {
         fvm::vm::exit(err.exit_code().value(), err.take_data(), Some(err.msg()))
     });
 

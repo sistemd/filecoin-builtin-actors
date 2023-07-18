@@ -25,7 +25,18 @@ use crate::ActorError;
 #[macro_export]
 macro_rules! actor_dispatch {
     ($($(#[$m:meta])* $(_)? $($method:ident)|* => $func:ident $([$tag:ident])?,)*) => {
-        fn invoke_method<RT>(
+        fn create<RT>(
+            rt: &RT,
+            args: Option<fvm_ipld_encoding::ipld_block::IpldBlock>,
+        ) -> Result<Option<fvm_ipld_encoding::ipld_block::IpldBlock>, $crate::ActorError>
+        where
+            RT: $crate::runtime::Runtime,
+            RT::Blockstore: Clone,
+        {
+            $crate::dispatch(rt, Self::constructor, &args)
+        }
+
+        fn invoke<RT>(
             rt: &RT,
             method: fvm_shared::MethodNum,
             args: Option<fvm_ipld_encoding::ipld_block::IpldBlock>,
@@ -63,7 +74,18 @@ macro_rules! actor_dispatch {
 #[macro_export]
 macro_rules! actor_dispatch_unrestricted {
     ($($(#[$m:meta])* $(_)? $($method:ident)|* => $func:ident $([$tag:ident])?,)*) => {
-        fn invoke_method<RT>(
+        fn create<RT>(
+            rt: &RT,
+            args: Option<fvm_ipld_encoding::ipld_block::IpldBlock>,
+        ) -> Result<Option<fvm_ipld_encoding::ipld_block::IpldBlock>, $crate::ActorError>
+        where
+            RT: $crate::runtime::Runtime,
+            RT::Blockstore: Clone,
+        {
+            $crate::dispatch(rt, Self::constructor, &args)
+        }
+
+        fn invoke<RT>(
             rt: &RT,
             method: fvm_shared::MethodNum,
             args: Option<fvm_ipld_encoding::ipld_block::IpldBlock>,
