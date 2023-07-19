@@ -66,11 +66,11 @@ fn remove_datacap_simple_successful_path() {
 
     ExpectInvocation {
         to: VERIFIED_REGISTRY_ACTOR_ADDR,
-        method: VerifregMethod::AddVerifiedClient as u64,
+        entrypoint: VerifregMethod::AddVerifiedClient as u64,
         params: Some(IpldBlock::serialize_cbor(&add_verified_client_params).unwrap()),
         subinvocs: Some(vec![ExpectInvocation {
             to: DATACAP_TOKEN_ACTOR_ADDR,
-            method: DataCapMethod::MintExported as u64,
+            entrypoint: DataCapMethod::MintExported as u64,
             params: Some(IpldBlock::serialize_cbor(&mint_params).unwrap()),
             subinvocs: None,
             ..Default::default()
@@ -367,13 +367,13 @@ fn expect_remove_datacap(
     .concat();
     ExpectInvocation {
         to: VERIFIED_REGISTRY_ACTOR_ADDR,
-        method: VerifregMethod::RemoveVerifiedClientDataCap as u64,
+        entrypoint: VerifregMethod::RemoveVerifiedClientDataCap as u64,
         params: Some(IpldBlock::serialize_cbor(&params).unwrap()),
         code: Some(ExitCode::OK),
         subinvocs: Some(vec![
             ExpectInvocation {
                 to: params.verifier_request_1.verifier,
-                method: AccountMethod::AuthenticateMessageExported as u64,
+                entrypoint: AccountMethod::AuthenticateMessageExported as u64,
                 params: Some(
                     IpldBlock::serialize_cbor(&AuthenticateMessageParams {
                         signature: payload1.clone(),
@@ -387,7 +387,7 @@ fn expect_remove_datacap(
             },
             ExpectInvocation {
                 to: params.verifier_request_2.verifier,
-                method: AccountMethod::AuthenticateMessageExported as u64,
+                entrypoint: AccountMethod::AuthenticateMessageExported as u64,
                 params: Some(
                     IpldBlock::serialize_cbor(&AuthenticateMessageParams {
                         signature: payload2.clone(),
@@ -401,7 +401,7 @@ fn expect_remove_datacap(
             },
             ExpectInvocation {
                 to: DATACAP_TOKEN_ACTOR_ADDR,
-                method: DataCapMethod::BalanceExported as u64,
+                entrypoint: DataCapMethod::BalanceExported as u64,
                 params: Some(IpldBlock::serialize_cbor(&params.verified_client_to_remove).unwrap()),
                 code: Some(ExitCode::OK),
                 subinvocs: None,
@@ -409,7 +409,7 @@ fn expect_remove_datacap(
             },
             ExpectInvocation {
                 to: DATACAP_TOKEN_ACTOR_ADDR,
-                method: DataCapMethod::DestroyExported as u64,
+                entrypoint: DataCapMethod::DestroyExported as u64,
                 params: Some(
                     IpldBlock::serialize_cbor(&DestroyParams {
                         owner: params.verified_client_to_remove,

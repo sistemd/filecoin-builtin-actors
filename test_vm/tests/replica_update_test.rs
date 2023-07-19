@@ -1039,41 +1039,41 @@ fn replica_update_verified_deal() {
     // check for the expected subcalls
     ExpectInvocation {
         to: maddr,
-        method: MinerMethod::ProveReplicaUpdates2 as u64,
+        entrypoint: MinerMethod::ProveReplicaUpdates2 as u64,
         subinvocs: Some(vec![
             ExpectInvocation {
                 to: STORAGE_MARKET_ACTOR_ADDR,
-                method: MarketMethod::ActivateDeals as u64,
+                entrypoint: MarketMethod::ActivateDeals as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: VERIFIED_REGISTRY_ACTOR_ADDR,
-                method: VerifregMethod::ClaimAllocations as u64,
+                entrypoint: VerifregMethod::ClaimAllocations as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_MARKET_ACTOR_ADDR,
-                method: MarketMethod::VerifyDealsForActivation as u64,
+                entrypoint: MarketMethod::VerifyDealsForActivation as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: REWARD_ACTOR_ADDR,
-                method: RewardMethod::ThisEpochReward as u64,
+                entrypoint: RewardMethod::ThisEpochReward as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::CurrentTotalPower as u64,
+                entrypoint: PowerMethod::CurrentTotalPower as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::UpdatePledgeTotal as u64,
+                entrypoint: PowerMethod::UpdatePledgeTotal as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::UpdateClaimedPower as u64,
+                entrypoint: PowerMethod::UpdateClaimedPower as u64,
                 params: Some(
                     IpldBlock::serialize_cbor(&expected_update_claimed_power_params).unwrap(),
                 ),

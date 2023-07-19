@@ -118,7 +118,7 @@ pub fn apply_code<S: Serialize, BS: Blockstore>(
     code: ExitCode,
 ) -> RawBytes {
     let params = params.map(|p| IpldBlock::serialize_cbor(&p).unwrap().unwrap());
-    let res = v.execute_message(from, to, value, method, params).unwrap();
+    let res = v.execute_message(from, to, value, Entrypoint::Invoke(method), params).unwrap();
     assert_eq!(code, res.code, "expected code {}, got {} ({})", code, res.code, res.message);
     res.ret.map_or(RawBytes::default(), |b| RawBytes::new(b.data))
 }
@@ -157,7 +157,7 @@ pub fn create_miner<BS: Blockstore>(
             owner,
             &STORAGE_POWER_ACTOR_ADDR,
             balance,
-            PowerMethod::CreateMiner as u64,
+            Entrypoint::Invoke(PowerMethod::CreateMiner as u64),
             Some(params),
         )
         .unwrap()
@@ -223,11 +223,11 @@ pub fn miner_prove_sector<BS: Blockstore>(
 
     ExpectInvocation {
         to: *miner_id,
-        method: MinerMethod::ProveCommitSector as u64,
+        entrypoint: Entrypoint::Invoke(MinerMethod::ProveCommitSector as u64),
         from: Some(*worker),
         subinvocs: Some(vec![ExpectInvocation {
             to: STORAGE_POWER_ACTOR_ADDR,
-            method: PowerMethod::SubmitPoRepForBulkVerify as u64,
+            entrypoint: Entrypoint::Invoke(PowerMethod::SubmitPoRepForBulkVerify as u64),
             ..Default::default()
         }]),
         ..Default::default()
@@ -253,12 +253,12 @@ pub fn precommit_sectors_v2<BS: Blockstore>(
         vec![
             ExpectInvocation {
                 to: REWARD_ACTOR_ADDR,
-                method: RewardMethod::ThisEpochReward as u64,
+                entrypoint: Entrypoint::Invoke(RewardMethod::ThisEpochReward as u64),
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::CurrentTotalPower as u64,
+                entrypoint: Entrypoint::Invoke(PowerMethod::CurrentTotalPower as u64),
                 ..Default::default()
             },
         ]
@@ -266,14 +266,14 @@ pub fn precommit_sectors_v2<BS: Blockstore>(
     let invoc_first = || -> ExpectInvocation {
         ExpectInvocation {
             to: STORAGE_POWER_ACTOR_ADDR,
-            method: PowerMethod::EnrollCronEvent as u64,
+            entrypoint: Entrypoint::Invoke(PowerMethod::EnrollCronEvent as u64),
             ..Default::default()
         }
     };
     let invoc_net_fee = |fee: TokenAmount| -> ExpectInvocation {
         ExpectInvocation {
             to: BURNT_FUNDS_ACTOR_ADDR,
-            method: METHOD_SEND,
+            entrypoint: Entrypoint::Invoke(METHOD_SEND),
             value: Some(fee),
             ..Default::default()
         }
@@ -328,7 +328,7 @@ pub fn precommit_sectors_v2<BS: Blockstore>(
             );
             let expect = ExpectInvocation {
                 to: mid,
-                method: MinerMethod::PreCommitSectorBatch as u64,
+                entrypoint: Entrypoint::Invoke(MinerMethod::PreCommitSectorBatch as u64),
                 params: Some(
                     IpldBlock::serialize_cbor(&PreCommitSectorBatchParams {
                         sectors: param_sectors,
@@ -377,7 +377,7 @@ pub fn precommit_sectors_v2<BS: Blockstore>(
 
             let expect = ExpectInvocation {
                 to: mid,
-                method: MinerMethod::PreCommitSectorBatch2 as u64,
+                entrypoint: Entrypoint::Invoke(MinerMethod::PreCommitSectorBatch2 as u64),
                 params: Some(
                     IpldBlock::serialize_cbor(&PreCommitSectorBatchParams2 {
                         sectors: param_sectors,
@@ -461,28 +461,28 @@ pub fn prove_commit_sectors<BS: Blockstore>(
 
         ExpectInvocation {
             to: *maddr,
-            method: MinerMethod::ProveCommitAggregate as u64,
+            entrypoint: Entrypoint::Invoke(MinerMethod::ProveCommitAggregate as u64),
             from: Some(*worker),
             params: Some(prove_commit_aggregate_params_ser),
             subinvocs: Some(vec![
                 ExpectInvocation {
                     to: REWARD_ACTOR_ADDR,
-                    method: RewardMethod::ThisEpochReward as u64,
+                    entrypoint: Entrypoint::Invoke(RewardMethod::ThisEpochReward as u64),
                     ..Default::default()
                 },
                 ExpectInvocation {
                     to: STORAGE_POWER_ACTOR_ADDR,
-                    method: PowerMethod::CurrentTotalPower as u64,
+                    entrypoint: Entrypoint::Invoke(PowerMethod::CurrentTotalPower as u64),
                     ..Default::default()
                 },
                 ExpectInvocation {
                     to: STORAGE_POWER_ACTOR_ADDR,
-                    method: PowerMethod::UpdatePledgeTotal as u64,
+                    entrypoint: Entrypoint::Invoke(PowerMethod::UpdatePledgeTotal as u64),
                     ..Default::default()
                 },
                 ExpectInvocation {
                     to: BURNT_FUNDS_ACTOR_ADDR,
-                    method: METHOD_SEND,
+                    entrypoint: Entrypoint::Invoke(METHOD_SEND),
                     ..Default::default()
                 },
             ]),
@@ -533,7 +533,7 @@ pub fn miner_extend_sector_expiration2<BS: Blockstore>(
     if !claim_ids.is_empty() {
         subinvocs.push(ExpectInvocation {
             to: VERIFIED_REGISTRY_ACTOR_ADDR,
-            method: VerifregMethod::GetClaims as u64,
+            entrypoint: Entrypoint::Invoke(VerifregMethod::GetClaims as u64),
             code: Some(ExitCode::OK),
             params: Some(
                 IpldBlock::serialize_cbor(&GetClaimsParams {
@@ -548,7 +548,7 @@ pub fn miner_extend_sector_expiration2<BS: Blockstore>(
     if !power_delta.is_zero() {
         subinvocs.push(ExpectInvocation {
             to: STORAGE_POWER_ACTOR_ADDR,
-            method: PowerMethod::UpdateClaimedPower as u64,
+            entrypoint: Entrypoint::Invoke(PowerMethod::UpdateClaimedPower as u64),
             params: Some(
                 IpldBlock::serialize_cbor(&UpdateClaimedPowerParams {
                     raw_byte_delta: power_delta.raw,
@@ -562,7 +562,7 @@ pub fn miner_extend_sector_expiration2<BS: Blockstore>(
 
     ExpectInvocation {
         to: *miner_id,
-        method: MinerMethod::ExtendSectorExpiration2 as u64,
+        entrypoint: Entrypoint::Invoke(MinerMethod::ExtendSectorExpiration2 as u64),
         subinvocs: Some(subinvocs),
         code: Some(ExitCode::OK),
         ..Default::default()
@@ -778,7 +778,7 @@ pub fn submit_windowed_post<BS: Blockstore>(
             .unwrap();
             subinvocs = Some(vec![ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::UpdateClaimedPower as u64,
+                entrypoint: Entrypoint::Invoke(PowerMethod::UpdateClaimedPower as u64),
                 params: Some(update_power_params),
                 ..Default::default()
             }]);
@@ -787,7 +787,7 @@ pub fn submit_windowed_post<BS: Blockstore>(
 
     ExpectInvocation {
         to: *maddr,
-        method: MinerMethod::SubmitWindowedPoSt as u64,
+        entrypoint: Entrypoint::Invoke(MinerMethod::SubmitWindowedPoSt as u64),
         subinvocs,
         ..Default::default()
     }
@@ -867,11 +867,11 @@ pub fn withdraw_balance<BS: Blockstore>(
         ExpectInvocation {
             from: Some(*from),
             to: *m_addr,
-            method: MinerMethod::WithdrawBalance as u64,
+            entrypoint: Entrypoint::Invoke(MinerMethod::WithdrawBalance as u64),
             params: Some(withdraw_balance_params_se),
             subinvocs: Some(vec![ExpectInvocation {
                 to: *from,
-                method: METHOD_SEND as u64,
+                entrypoint: Entrypoint::Invoke(METHOD_SEND as u64),
                 value: Some(expect_withdraw_amount.clone()),
                 ..Default::default()
             }]),
@@ -933,14 +933,14 @@ pub fn verifreg_add_verifier<BS: Blockstore>(
     );
     ExpectInvocation {
         to: TEST_VERIFREG_ROOT_ADDR,
-        method: MultisigMethod::Propose as u64,
+        entrypoint: Entrypoint::Invoke(MultisigMethod::Propose as u64),
         subinvocs: Some(vec![ExpectInvocation {
             to: VERIFIED_REGISTRY_ACTOR_ADDR,
-            method: VerifregMethod::AddVerifier as u64,
+            entrypoint: Entrypoint::Invoke(VerifregMethod::AddVerifier as u64),
             params: Some(IpldBlock::serialize_cbor(&add_verifier_params).unwrap()),
             subinvocs: Some(vec![ExpectInvocation {
                 to: DATACAP_TOKEN_ACTOR_ADDR,
-                method: DataCapMethod::BalanceExported as u64,
+                entrypoint: Entrypoint::Invoke(DataCapMethod::BalanceExported as u64),
                 params: Some(IpldBlock::serialize_cbor(&verifier).unwrap()),
                 code: Some(ExitCode::OK),
                 ..Default::default()
@@ -970,10 +970,10 @@ pub fn verifreg_add_client<BS: Blockstore>(
     );
     ExpectInvocation {
         to: VERIFIED_REGISTRY_ACTOR_ADDR,
-        method: VerifregMethod::AddVerifiedClient as u64,
+        entrypoint: Entrypoint::Invoke(VerifregMethod::AddVerifiedClient as u64),
         subinvocs: Some(vec![ExpectInvocation {
             to: DATACAP_TOKEN_ACTOR_ADDR,
-            method: DataCapMethod::MintExported as u64,
+            entrypoint: Entrypoint::Invoke(DataCapMethod::MintExported as u64),
             params: Some(
                 IpldBlock::serialize_cbor(&MintParams {
                     to: *client,
@@ -1034,10 +1034,10 @@ pub fn verifreg_remove_expired_allocations<BS: Blockstore>(
     );
     ExpectInvocation {
         to: VERIFIED_REGISTRY_ACTOR_ADDR,
-        method: VerifregMethod::RemoveExpiredAllocations as u64,
+        entrypoint: Entrypoint::Invoke(VerifregMethod::RemoveExpiredAllocations as u64),
         subinvocs: Some(vec![ExpectInvocation {
             to: DATACAP_TOKEN_ACTOR_ADDR,
-            method: DataCapMethod::TransferExported as u64,
+            entrypoint: Entrypoint::Invoke(DataCapMethod::TransferExported as u64),
             code: Some(ExitCode::OK),
             params: Some(
                 IpldBlock::serialize_cbor(&TransferParams {
@@ -1101,10 +1101,10 @@ pub fn datacap_extend_claim<BS: Blockstore>(
 
     ExpectInvocation {
         to: DATACAP_TOKEN_ACTOR_ADDR,
-        method: DataCapMethod::TransferExported as u64,
+        entrypoint: Entrypoint::Invoke(DataCapMethod::TransferExported as u64),
         subinvocs: Some(vec![ExpectInvocation {
             to: VERIFIED_REGISTRY_ACTOR_ADDR,
-            method: VerifregMethod::UniversalReceiverHook as u64,
+            entrypoint: Entrypoint::Invoke(VerifregMethod::UniversalReceiverHook as u64),
             code: Some(ExitCode::OK),
             params: Some(
                 IpldBlock::serialize_cbor(&UniversalReceiverParams {
@@ -1126,7 +1126,7 @@ pub fn datacap_extend_claim<BS: Blockstore>(
             ),
             subinvocs: Some(vec![ExpectInvocation {
                 to: DATACAP_TOKEN_ACTOR_ADDR,
-                method: DataCapMethod::BurnExported as u64,
+                entrypoint: Entrypoint::Invoke(DataCapMethod::BurnExported as u64),
                 code: Some(ExitCode::OK),
                 params: Some(
                     IpldBlock::serialize_cbor(&BurnParams { amount: token_amount }).unwrap(),
@@ -1206,22 +1206,22 @@ pub fn market_publish_deal<BS: Blockstore>(
     let mut expect_publish_invocs = vec![
         ExpectInvocation {
             to: *miner_id,
-            method: MinerMethod::IsControllingAddressExported as u64,
+            entrypoint: Entrypoint::Invoke(MinerMethod::IsControllingAddressExported as u64),
             ..Default::default()
         },
         ExpectInvocation {
             to: REWARD_ACTOR_ADDR,
-            method: RewardMethod::ThisEpochReward as u64,
+            entrypoint: Entrypoint::Invoke(RewardMethod::ThisEpochReward as u64),
             ..Default::default()
         },
         ExpectInvocation {
             to: STORAGE_POWER_ACTOR_ADDR,
-            method: PowerMethod::CurrentTotalPower as u64,
+            entrypoint: Entrypoint::Invoke(PowerMethod::CurrentTotalPower as u64),
             ..Default::default()
         },
         ExpectInvocation {
             to: *deal_client,
-            method: AccountMethod::AuthenticateMessageExported as u64,
+            entrypoint: Entrypoint::Invoke(AccountMethod::AuthenticateMessageExported as u64),
             ..Default::default()
         },
     ];
@@ -1233,7 +1233,7 @@ pub fn market_publish_deal<BS: Blockstore>(
 
         expect_publish_invocs.push(ExpectInvocation {
             to: DATACAP_TOKEN_ACTOR_ADDR,
-            method: DataCapMethod::BalanceExported as u64,
+            entrypoint: Entrypoint::Invoke(DataCapMethod::BalanceExported as u64),
             params: Some(IpldBlock::serialize_cbor(&deal_client).unwrap()),
             code: Some(ExitCode::OK),
             ..Default::default()
@@ -1251,7 +1251,7 @@ pub fn market_publish_deal<BS: Blockstore>(
         };
         expect_publish_invocs.push(ExpectInvocation {
             to: DATACAP_TOKEN_ACTOR_ADDR,
-            method: DataCapMethod::TransferFromExported as u64,
+            entrypoint: Entrypoint::Invoke(DataCapMethod::TransferFromExported as u64),
             params: Some(
                 IpldBlock::serialize_cbor(&TransferFromParams {
                     from: *deal_client,
@@ -1264,7 +1264,7 @@ pub fn market_publish_deal<BS: Blockstore>(
             code: Some(ExitCode::OK),
             subinvocs: Some(vec![ExpectInvocation {
                 to: VERIFIED_REGISTRY_ACTOR_ADDR,
-                method: VerifregMethod::UniversalReceiverHook as u64,
+                entrypoint: Entrypoint::Invoke(VerifregMethod::UniversalReceiverHook as u64),
                 params: Some(
                     IpldBlock::serialize_cbor(&UniversalReceiverParams {
                         type_: FRC46_TOKEN_TYPE,
@@ -1291,12 +1291,12 @@ pub fn market_publish_deal<BS: Blockstore>(
     }
     expect_publish_invocs.push(ExpectInvocation {
         to: *deal_client,
-        method: MARKET_NOTIFY_DEAL_METHOD,
+        entrypoint: Entrypoint::Invoke(MARKET_NOTIFY_DEAL_METHOD),
         ..Default::default()
     });
     ExpectInvocation {
         to: STORAGE_MARKET_ACTOR_ADDR,
-        method: MarketMethod::PublishStorageDeals as u64,
+        entrypoint: Entrypoint::Invoke(MarketMethod::PublishStorageDeals as u64),
         subinvocs: Some(expect_publish_invocs),
         ..Default::default()
     }

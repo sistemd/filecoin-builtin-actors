@@ -86,10 +86,14 @@ fn test_proposal_hash() {
     );
     let expect = ExpectInvocation {
         to: msig_addr,
-        method: MsigMethod::Approve as u64,
+        entrypoint: MsigMethod::Approve as u64,
         subinvocs: Some(vec![
             // Tx goes through to fund the system actor
-            ExpectInvocation { to: SYSTEM_ACTOR_ADDR, method: METHOD_SEND, ..Default::default() },
+            ExpectInvocation {
+                to: SYSTEM_ACTOR_ADDR,
+                entrypoint: METHOD_SEND,
+                ..Default::default()
+            },
         ]),
         ..Default::default()
     };

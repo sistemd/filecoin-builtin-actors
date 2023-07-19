@@ -81,11 +81,11 @@ fn setup(store: &'_ MemoryBlockstore) -> (TestVM<MemoryBlockstore>, MinerInfo, S
     );
     ExpectInvocation {
         to: id_addr,
-        method: MinerMethod::ProveCommitSector as u64,
+        entrypoint: test_vm::Entrypoint::Invoke(MinerMethod::ProveCommitSector as u64),
         params: Some(prove_params_ser),
         subinvocs: Some(vec![ExpectInvocation {
             to: STORAGE_POWER_ACTOR_ADDR,
-            method: PowerMethod::SubmitPoRepForBulkVerify as u64,
+            entrypoint: test_vm::Entrypoint::Invoke(PowerMethod::SubmitPoRepForBulkVerify as u64),
             ..Default::default()
         }]),
         ..Default::default()
@@ -96,37 +96,45 @@ fn setup(store: &'_ MemoryBlockstore) -> (TestVM<MemoryBlockstore>, MinerInfo, S
             &SYSTEM_ACTOR_ADDR,
             &CRON_ACTOR_ADDR,
             &TokenAmount::zero(),
-            CronMethod::EpochTick as u64,
+            test_vm::Entrypoint::Invoke(CronMethod::EpochTick as u64),
             None::<RawBytes>,
         )
         .unwrap();
     assert_eq!(ExitCode::OK, res.code);
     ExpectInvocation {
         to: CRON_ACTOR_ADDR,
-        method: CronMethod::EpochTick as u64,
+        entrypoint: test_vm::Entrypoint::Invoke(CronMethod::EpochTick as u64),
         subinvocs: Some(vec![
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::OnEpochTickEnd as u64,
+                entrypoint: test_vm::Entrypoint::Invoke(PowerMethod::OnEpochTickEnd as u64),
                 subinvocs: Some(vec![
                     ExpectInvocation {
                         to: REWARD_ACTOR_ADDR,
-                        method: RewardMethod::ThisEpochReward as u64,
+                        entrypoint: test_vm::Entrypoint::Invoke(
+                            RewardMethod::ThisEpochReward as u64,
+                        ),
                         ..Default::default()
                     },
                     ExpectInvocation {
                         to: id_addr,
-                        method: MinerMethod::ConfirmSectorProofsValid as u64,
+                        entrypoint: test_vm::Entrypoint::Invoke(
+                            MinerMethod::ConfirmSectorProofsValid as u64,
+                        ),
                         subinvocs: Some(vec![ExpectInvocation {
                             to: STORAGE_POWER_ACTOR_ADDR,
-                            method: PowerMethod::UpdatePledgeTotal as u64,
+                            entrypoint: test_vm::Entrypoint::Invoke(
+                                PowerMethod::UpdatePledgeTotal as u64,
+                            ),
                             ..Default::default()
                         }]),
                         ..Default::default()
                     },
                     ExpectInvocation {
                         to: REWARD_ACTOR_ADDR,
-                        method: RewardMethod::UpdateNetworkKPI as u64,
+                        entrypoint: test_vm::Entrypoint::Invoke(
+                            RewardMethod::UpdateNetworkKPI as u64,
+                        ),
                         ..Default::default()
                     },
                 ]),
@@ -134,7 +142,7 @@ fn setup(store: &'_ MemoryBlockstore) -> (TestVM<MemoryBlockstore>, MinerInfo, S
             },
             ExpectInvocation {
                 to: STORAGE_MARKET_ACTOR_ADDR,
-                method: MarketMethod::CronTick as u64,
+                entrypoint: test_vm::Entrypoint::Invoke(MarketMethod::CronTick as u64),
                 ..Default::default()
             },
         ]),
@@ -253,31 +261,39 @@ fn missed_first_post_deadline() {
 
     ExpectInvocation {
         to: CRON_ACTOR_ADDR,
-        method: CronMethod::EpochTick as u64,
+        entrypoint: test_vm::Entrypoint::Invoke(CronMethod::EpochTick as u64),
         params: None,
         subinvocs: Some(vec![
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::OnEpochTickEnd as u64,
+                entrypoint: test_vm::Entrypoint::Invoke(PowerMethod::OnEpochTickEnd as u64),
                 subinvocs: Some(vec![
                     ExpectInvocation {
                         to: REWARD_ACTOR_ADDR,
-                        method: RewardMethod::ThisEpochReward as u64,
+                        entrypoint: test_vm::Entrypoint::Invoke(
+                            RewardMethod::ThisEpochReward as u64,
+                        ),
                         ..Default::default()
                     },
                     ExpectInvocation {
                         to: miner_info.miner_id,
-                        method: MinerMethod::OnDeferredCronEvent as u64,
+                        entrypoint: test_vm::Entrypoint::Invoke(
+                            MinerMethod::OnDeferredCronEvent as u64,
+                        ),
                         subinvocs: Some(vec![ExpectInvocation {
                             to: STORAGE_POWER_ACTOR_ADDR,
-                            method: PowerMethod::EnrollCronEvent as u64,
+                            entrypoint: test_vm::Entrypoint::Invoke(
+                                PowerMethod::EnrollCronEvent as u64,
+                            ),
                             ..Default::default()
                         }]),
                         ..Default::default()
                     },
                     ExpectInvocation {
                         to: REWARD_ACTOR_ADDR,
-                        method: RewardMethod::UpdateNetworkKPI as u64,
+                        entrypoint: test_vm::Entrypoint::Invoke(
+                            RewardMethod::UpdateNetworkKPI as u64,
+                        ),
                         ..Default::default()
                     },
                 ]),
@@ -285,7 +301,7 @@ fn missed_first_post_deadline() {
             },
             ExpectInvocation {
                 to: STORAGE_MARKET_ACTOR_ADDR,
-                method: MarketMethod::CronTick as u64,
+                entrypoint: test_vm::Entrypoint::Invoke(MarketMethod::CronTick as u64),
                 ..Default::default()
             },
         ]),
@@ -358,26 +374,30 @@ fn overdue_precommit() {
 
     ExpectInvocation {
         to: CRON_ACTOR_ADDR,
-        method: CronMethod::EpochTick as u64,
+        entrypoint: test_vm::Entrypoint::Invoke(CronMethod::EpochTick as u64),
         params: None,
         subinvocs: Some(vec![
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::OnEpochTickEnd as u64,
+                entrypoint: test_vm::Entrypoint::Invoke(PowerMethod::OnEpochTickEnd as u64),
                 subinvocs: Some(vec![
                     ExpectInvocation {
                         to: REWARD_ACTOR_ADDR,
-                        method: RewardMethod::ThisEpochReward as u64,
+                        entrypoint: test_vm::Entrypoint::Invoke(
+                            RewardMethod::ThisEpochReward as u64,
+                        ),
                         ..Default::default()
                     },
                     ExpectInvocation {
                         to: id_addr,
-                        method: MinerMethod::OnDeferredCronEvent as u64,
+                        entrypoint: test_vm::Entrypoint::Invoke(
+                            MinerMethod::OnDeferredCronEvent as u64,
+                        ),
                         subinvocs: Some(vec![
                             ExpectInvocation {
                                 // The call to burnt funds indicates the overdue precommit has been penalized
                                 to: BURNT_FUNDS_ACTOR_ADDR,
-                                method: METHOD_SEND,
+                                entrypoint: test_vm::Entrypoint::Invoke(METHOD_SEND),
                                 value: Option::from(precommit.pre_commit_deposit),
                                 ..Default::default()
                             },
@@ -387,7 +407,9 @@ fn overdue_precommit() {
                     },
                     ExpectInvocation {
                         to: REWARD_ACTOR_ADDR,
-                        method: RewardMethod::UpdateNetworkKPI as u64,
+                        entrypoint: test_vm::Entrypoint::Invoke(
+                            RewardMethod::UpdateNetworkKPI as u64,
+                        ),
                         ..Default::default()
                     },
                 ]),
@@ -395,7 +417,7 @@ fn overdue_precommit() {
             },
             ExpectInvocation {
                 to: STORAGE_MARKET_ACTOR_ADDR,
-                method: MarketMethod::CronTick as u64,
+                entrypoint: test_vm::Entrypoint::Invoke(MarketMethod::CronTick as u64),
                 ..Default::default()
             },
         ]),
@@ -487,7 +509,7 @@ fn aggregate_bad_sector_number() {
     );
     ExpectInvocation {
         to: id_addr,
-        method: MinerMethod::ProveCommitAggregate as u64,
+        entrypoint: test_vm::Entrypoint::Invoke(MinerMethod::ProveCommitAggregate as u64),
         params: Some(prove_params_ser),
         subinvocs: Some(vec![]),
         ..Default::default()
@@ -566,7 +588,7 @@ fn aggregate_size_limits() {
     );
     ExpectInvocation {
         to: id_addr,
-        method: MinerMethod::ProveCommitAggregate as u64,
+        entrypoint: test_vm::Entrypoint::Invoke(MinerMethod::ProveCommitAggregate as u64),
         params: Some(prove_params_ser),
         subinvocs: Some(vec![]),
         ..Default::default()
@@ -593,7 +615,7 @@ fn aggregate_size_limits() {
     );
     ExpectInvocation {
         to: id_addr,
-        method: MinerMethod::ProveCommitAggregate as u64,
+        entrypoint: test_vm::Entrypoint::Invoke(MinerMethod::ProveCommitAggregate as u64),
         params: Some(prove_params_ser),
         subinvocs: Some(vec![]),
         ..Default::default()
@@ -621,7 +643,7 @@ fn aggregate_size_limits() {
     );
     ExpectInvocation {
         to: id_addr,
-        method: MinerMethod::ProveCommitAggregate as u64,
+        entrypoint: test_vm::Entrypoint::Invoke(MinerMethod::ProveCommitAggregate as u64),
         params: Some(prove_params_ser),
         subinvocs: Some(vec![]),
         ..Default::default()
@@ -697,7 +719,7 @@ fn aggregate_bad_sender() {
     );
     ExpectInvocation {
         to: id_addr,
-        method: MinerMethod::ProveCommitAggregate as u64,
+        entrypoint: test_vm::Entrypoint::Invoke(MinerMethod::ProveCommitAggregate as u64),
         params: Some(prove_params_ser),
         subinvocs: Some(vec![]),
         ..Default::default()
@@ -803,27 +825,27 @@ fn aggregate_one_precommit_expires() {
     );
     ExpectInvocation {
         to: id_addr,
-        method: MinerMethod::ProveCommitAggregate as u64,
+        entrypoint: test_vm::Entrypoint::Invoke(MinerMethod::ProveCommitAggregate as u64),
         params: Some(prove_params_ser),
         subinvocs: Some(vec![
             ExpectInvocation {
                 to: REWARD_ACTOR_ADDR,
-                method: RewardMethod::ThisEpochReward as u64,
+                entrypoint: test_vm::Entrypoint::Invoke(RewardMethod::ThisEpochReward as u64),
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::CurrentTotalPower as u64,
+                entrypoint: test_vm::Entrypoint::Invoke(PowerMethod::CurrentTotalPower as u64),
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::UpdatePledgeTotal as u64,
+                entrypoint: test_vm::Entrypoint::Invoke(PowerMethod::UpdatePledgeTotal as u64),
                 ..Default::default()
             },
             ExpectInvocation {
                 to: BURNT_FUNDS_ACTOR_ADDR,
-                method: METHOD_SEND,
+                entrypoint: test_vm::Entrypoint::Invoke(METHOD_SEND),
                 ..Default::default()
             },
         ]),

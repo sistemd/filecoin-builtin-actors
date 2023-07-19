@@ -98,7 +98,7 @@ pub trait VM<BS: Blockstore> {
         from: &Address,
         to: &Address,
         value: &TokenAmount,
-        method: MethodNum,
+        entrypoint: Entrypoint,
         params: Option<IpldBlock>,
     ) -> Result<MessageResult, TestVMError>;
 
@@ -177,7 +177,7 @@ where
         from: &Address,
         to: &Address,
         value: &TokenAmount,
-        method: MethodNum,
+        entrypoint: Entrypoint,
         params: Option<IpldBlock>,
     ) -> Result<MessageResult, TestVMError> {
         let from_id = &self.normalize_address(from).unwrap();
@@ -200,7 +200,8 @@ where
             new_actor_addr_count: RefCell::new(0),
             circ_supply: TokenAmount::from_whole(1_000_000_000),
         };
-        let msg = InternalMessage { from: *from, to: *to, value: value.clone(), method, params };
+        let msg =
+            InternalMessage { from: *from, to: *to, value: value.clone(), entrypoint, params };
         let mut new_ctx = InvocationCtx {
             v: self,
             top,
@@ -350,7 +351,7 @@ where
             &INIT_ACTOR_ADDR,
             &Address::new_bls(VERIFREG_ROOT_KEY).unwrap(),
             &TokenAmount::zero(),
-            METHOD_SEND,
+            Entrypoint::Invoke(METHOD_SEND),
             None::<RawBytes>,
         )
         .unwrap();
@@ -373,7 +374,7 @@ where
                 &SYSTEM_ACTOR_ADDR,
                 &INIT_ACTOR_ADDR,
                 &TokenAmount::zero(),
-                fil_actor_init::Method::Exec as u64,
+                Entrypoint::Invoke(fil_actor_init::Method::Exec as u64),
                 Some(fil_actor_init::ExecParams {
                     code_cid: *MULTISIG_ACTOR_CODE_ID,
                     constructor_params: msig_ctor_params,
@@ -419,7 +420,7 @@ where
             &SYSTEM_ACTOR_ADDR,
             &Address::new_bls(FAUCET_ROOT_KEY).unwrap(),
             &faucet_total,
-            METHOD_SEND,
+            Entrypoint::Invoke(METHOD_SEND),
             None::<RawBytes>,
         )
         .unwrap();
@@ -564,7 +565,7 @@ where
         from: &Address,
         to: &Address,
         value: &TokenAmount,
-        method: MethodNum,
+        entrypoint: Entrypoint,
         params: Option<S>,
     ) -> Result<MessageResult, TestVMError> {
         let from_id = &self.normalize_address(from).unwrap();
@@ -591,7 +592,7 @@ where
             from: *from_id,
             to: *to,
             value: value.clone(),
-            method,
+            entrypoint,
             params: params.map(|p| IpldBlock::serialize_cbor(&p).unwrap().unwrap()),
         };
         let mut new_ctx = InvocationCtx {
@@ -686,7 +687,7 @@ pub struct InternalMessage {
     from: Address,
     to: Address,
     value: TokenAmount,
-    method: MethodNum,
+    entrypoint: Entrypoint,
     params: Option<IpldBlock>,
 }
 
@@ -789,7 +790,7 @@ where
             from: SYSTEM_ACTOR_ADDR,
             to: target_id_addr,
             value: TokenAmount::zero(),
-            method: METHOD_CONSTRUCTOR,
+            entrypoint: Entrypoint::Create,
             params: IpldBlock::serialize_cbor(target).unwrap(),
         };
         {
@@ -874,7 +875,7 @@ where
         self.v.set_actor(to_addr, to_actor);
 
         // Exit early on send
-        if self.msg.method == METHOD_SEND {
+        if self.msg.entrypoint == Entrypoint::Invoke(METHOD_SEND) {
             return Ok(None);
         }
 
@@ -883,24 +884,30 @@ where
         let params = self.msg.params.clone();
         let mut res = match ACTOR_TYPES.get(&to_actor.code).expect("Target actor is not a builtin")
         {
-            Type::Account => AccountActor::invoke(self, self.msg.method, params),
-            Type::Cron => CronActor::invoke(self, self.msg.method, params),
-            Type::Init => InitActor::invoke(self, self.msg.method, params),
-            Type::Market => MarketActor::invoke(self, self.msg.method, params),
-            Type::Miner => MinerActor::invoke(self, self.msg.method, params),
-            Type::Multisig => MultisigActor::invoke(self, self.msg.method, params),
-            Type::System => SystemActor::invoke(self, self.msg.method, params),
-            Type::Reward => RewardActor::invoke(self, self.msg.method, params),
-            Type::Power => PowerActor::invoke(self, self.msg.method, params),
-            Type::PaymentChannel => PaychActor::invoke(self, self.msg.method, params),
-            Type::VerifiedRegistry => VerifregActor::invoke(self, self.msg.method, params),
-            Type::DataCap => DataCapActor::invoke(self, self.msg.method, params),
+            Type::Account => AccountActor::invoke(self, self.msg.entrypoint.method_num(), params),
+            Type::Cron => CronActor::invoke(self, self.msg.entrypoint.method_num(), params),
+            Type::Init => InitActor::invoke(self, self.msg.entrypoint.method_num(), params),
+            Type::Market => MarketActor::invoke(self, self.msg.entrypoint.method_num(), params),
+            Type::Miner => MinerActor::invoke(self, self.msg.entrypoint.method_num(), params),
+            Type::Multisig => MultisigActor::invoke(self, self.msg.entrypoint.method_num(), params),
+            Type::System => SystemActor::invoke(self, self.msg.entrypoint.method_num(), params),
+            Type::Reward => RewardActor::invoke(self, self.msg.entrypoint.method_num(), params),
+            Type::Power => PowerActor::invoke(self, self.msg.entrypoint.method_num(), params),
+            Type::PaymentChannel => {
+                PaychActor::invoke(self, self.msg.entrypoint.method_num(), params)
+            }
+            Type::VerifiedRegistry => {
+                VerifregActor::invoke(self, self.msg.entrypoint.method_num(), params)
+            }
+            Type::DataCap => DataCapActor::invoke(self, self.msg.entrypoint.method_num(), params),
             Type::Placeholder => {
                 Err(ActorError::unhandled_message("placeholder actors only handle method 0".into()))
             }
-            Type::EVM => EvmContractActor::invoke(self, self.msg.method, params),
-            Type::EAM => EamActor::invoke(self, self.msg.method, params),
-            Type::EthAccount => EthAccountActor::invoke(self, self.msg.method, params),
+            Type::EVM => EvmContractActor::invoke(self, self.msg.entrypoint.method_num(), params),
+            Type::EAM => EamActor::invoke(self, self.msg.entrypoint.method_num(), params),
+            Type::EthAccount => {
+                EthAccountActor::invoke(self, self.msg.entrypoint.method_num(), params)
+            }
         };
         if res.is_ok() && !*self.caller_validated.borrow() {
             res = Err(actor_error!(assertion_failed, "failed to validate caller"));
@@ -1116,7 +1123,13 @@ where
             return Ok(Response { exit_code: ExitCode::SYS_ASSERTION_FAILED, return_data: None });
         }
 
-        let new_actor_msg = InternalMessage { from: self.to(), to: *to, value, method, params };
+        let new_actor_msg = InternalMessage {
+            from: self.to(),
+            to: *to,
+            value,
+            entrypoint: Entrypoint::Invoke(method),
+            params,
+        };
         let mut new_ctx = InvocationCtx {
             v: self.v,
             top: self.top.clone(),
@@ -1460,7 +1473,7 @@ pub struct InvocationTrace {
 pub struct ExpectInvocation {
     pub to: Address,
     // required
-    pub method: MethodNum,
+    pub entrypoint: Entrypoint,
     // required
     pub code: Option<ExitCode>,
     pub from: Option<Address>,
@@ -1470,10 +1483,34 @@ pub struct ExpectInvocation {
     pub subinvocs: Option<Vec<ExpectInvocation>>,
 }
 
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum Entrypoint {
+    Create,
+    Invoke(MethodNum),
+}
+
+impl std::fmt::Display for Entrypoint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Entrypoint::Create => write!(f, "create"),
+            Entrypoint::Invoke(m) => write!(f, "invoke({})", m),
+        }
+    }
+}
+
+impl Entrypoint {
+    pub fn method_num(&self) -> MethodNum {
+        match self {
+            Entrypoint::Create => panic!("should be invoke"),
+            Entrypoint::Invoke(m) => *m,
+        }
+    }
+}
+
 impl ExpectInvocation {
     // testing method that panics on no match
     pub fn matches(&self, invoc: &InvocationTrace) {
-        let id = format!("[{}:{}]", invoc.msg.to, invoc.msg.method);
+        let id = format!("[{}:{}]", invoc.msg.to, invoc.msg.entrypoint);
         self.quick_match(invoc, String::new());
         if let Some(c) = self.code {
             assert_eq!(
@@ -1533,7 +1570,7 @@ impl ExpectInvocation {
         invocs
             .iter()
             .enumerate()
-            .map(|(i, invoc)| format!("{}: [{}:{}],\n", i, invoc.msg.to, invoc.msg.method))
+            .map(|(i, invoc)| format!("{}: [{}:{}],\n", i, invoc.msg.to, invoc.msg.entrypoint))
             .collect()
     }
 
@@ -1541,21 +1578,21 @@ impl ExpectInvocation {
         invocs
             .iter()
             .enumerate()
-            .map(|(i, invoc)| format!("{}: [{}:{}],\n", i, invoc.to, invoc.method))
+            .map(|(i, invoc)| format!("{}: [{}:{}],\n", i, invoc.to, invoc.entrypoint))
             .collect()
     }
 
     pub fn quick_match(&self, invoc: &InvocationTrace, extra_msg: String) {
-        let id = format!("[{}:{}]", invoc.msg.to, invoc.msg.method);
+        let id = format!("[{}:{}]", invoc.msg.to, invoc.msg.entrypoint);
         assert_eq!(
             self.to, invoc.msg.to,
             "{} unexpected to addr: expected: {}, was: {} \n{}",
             id, self.to, invoc.msg.to, extra_msg
         );
         assert_eq!(
-            self.method, invoc.msg.method,
+            self.entrypoint, invoc.msg.entrypoint,
             "{} unexpected method: expected: {}, was: {} \n{}",
-            id, self.method, invoc.msg.from, extra_msg
+            id, self.entrypoint, invoc.msg.from, extra_msg
         );
     }
 }
@@ -1563,7 +1600,7 @@ impl ExpectInvocation {
 impl Default for ExpectInvocation {
     fn default() -> Self {
         Self {
-            method: 0,
+            entrypoint: Entrypoint::Invoke(0),
             to: Address::new_id(0),
             code: None,
             from: None,

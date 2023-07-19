@@ -258,36 +258,36 @@ fn terminate_sectors() {
     );
     ExpectInvocation {
         to: miner_id_addr,
-        method: MinerMethod::TerminateSectors as u64,
+        entrypoint: MinerMethod::TerminateSectors as u64,
         subinvocs: Some(vec![
             ExpectInvocation {
                 to: REWARD_ACTOR_ADDR,
-                method: RewardMethod::ThisEpochReward as u64,
+                entrypoint: RewardMethod::ThisEpochReward as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::CurrentTotalPower as u64,
+                entrypoint: PowerMethod::CurrentTotalPower as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: BURNT_FUNDS_ACTOR_ADDR,
-                method: METHOD_SEND,
+                entrypoint: METHOD_SEND,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::UpdatePledgeTotal as u64,
+                entrypoint: PowerMethod::UpdatePledgeTotal as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_MARKET_ACTOR_ADDR,
-                method: MarketMethod::OnMinerSectorsTerminate as u64,
+                entrypoint: MarketMethod::OnMinerSectorsTerminate as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::UpdateClaimedPower as u64,
+                entrypoint: PowerMethod::UpdateClaimedPower as u64,
                 ..Default::default()
             },
         ]),
@@ -339,10 +339,10 @@ fn terminate_sectors() {
     );
     ExpectInvocation {
         to: STORAGE_MARKET_ACTOR_ADDR,
-        method: MarketMethod::WithdrawBalance as u64,
+        entrypoint: MarketMethod::WithdrawBalance as u64,
         subinvocs: Some(vec![ExpectInvocation {
             to: verified_client,
-            method: METHOD_SEND,
+            entrypoint: METHOD_SEND,
             value: Some(withdrawal),
             ..Default::default()
         }]),

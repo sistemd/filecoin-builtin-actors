@@ -54,7 +54,7 @@ fn test_evm_call() {
             &account,
             &EAM_ACTOR_ADDR,
             &TokenAmount::zero(),
-            fil_actor_eam::Method::CreateExternal as u64,
+            test_vm::Entrypoint::Invoke(fil_actor_eam::Method::CreateExternal as u64),
             Some(fil_actor_eam::CreateExternalParams(bytecode)),
         )
         .unwrap();
@@ -74,7 +74,7 @@ fn test_evm_call() {
             &account,
             &create_return.robust_address.unwrap(),
             &TokenAmount::zero(),
-            fil_actor_evm::Method::InvokeContract as u64,
+            test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
             Some(ContractParams(contract_params.to_vec())),
         )
         .unwrap();
@@ -108,7 +108,7 @@ fn test_evm_create() {
             &account,
             &EAM_ACTOR_ADDR,
             &TokenAmount::zero(),
-            fil_actor_eam::Method::CreateExternal as u64,
+            test_vm::Entrypoint::Invoke(fil_actor_eam::Method::CreateExternal as u64),
             Some(fil_actor_eam::CreateExternalParams(bytecode)),
         )
         .unwrap();
@@ -130,7 +130,7 @@ fn test_evm_create() {
                     &account,
                     &create_return.robust_address.unwrap(),
                     &TokenAmount::zero(),
-                    fil_actor_evm::Method::InvokeContract as u64,
+                    test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                     Some(ContractParams(call_params.to_vec())),
                 )
                 .unwrap();
@@ -157,7 +157,7 @@ fn test_evm_create() {
                     &account,
                     &child_addr,
                     &TokenAmount::zero(),
-                    fil_actor_evm::Method::InvokeContract as u64,
+                    test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                     Some(ContractParams(call_params.to_vec())),
                 )
                 .unwrap();
@@ -183,7 +183,7 @@ fn test_evm_create() {
                     &account,
                     &child_addr,
                     &TokenAmount::zero(),
-                    fil_actor_evm::Method::InvokeContract as u64,
+                    test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                     Some(ContractParams(call_params.to_vec())),
                 )
                 .unwrap();
@@ -203,7 +203,7 @@ fn test_evm_create() {
                     &account,
                     &child_addr,
                     &TokenAmount::zero(),
-                    fil_actor_evm::Method::InvokeContract as u64,
+                    test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                     Some(ContractParams(call_params.to_vec())),
                 )
                 .unwrap();
@@ -257,7 +257,7 @@ fn test_evm_eth_create_external() {
             &account,
             &EAM_ACTOR_ADDR,
             &TokenAmount::zero(),
-            fil_actor_eam::Method::CreateExternal as u64,
+            test_vm::Entrypoint::Invoke(fil_actor_eam::Method::CreateExternal as u64),
             Some(fil_actor_eam::CreateExternalParams(vec![])),
         )
         .unwrap();
@@ -279,7 +279,7 @@ fn test_evm_eth_create_external() {
             &account,
             &robust_addr,
             &TokenAmount::zero(),
-            fil_actor_evm::Method::InvokeContract as u64,
+            test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
             Some(ContractParams(vec![])),
         )
         .unwrap();
@@ -297,7 +297,7 @@ fn test_evm_empty_initcode() {
             &account,
             &EAM_ACTOR_ADDR,
             &TokenAmount::zero(),
-            fil_actor_eam::Method::CreateExternal as u64,
+            test_vm::Entrypoint::Invoke(fil_actor_eam::Method::CreateExternal as u64),
             Some(fil_actor_eam::CreateExternalParams(vec![])),
         )
         .unwrap();
@@ -336,7 +336,7 @@ fn test_evm_staticcall() {
                     account,
                     &EAM_ACTOR_ADDR,
                     &TokenAmount::zero(),
-                    fil_actor_eam::Method::CreateExternal as u64,
+                    test_vm::Entrypoint::Invoke(fil_actor_eam::Method::CreateExternal as u64),
                     Some(fil_actor_eam::CreateExternalParams(bytecode.clone())),
                 )
                 .unwrap();
@@ -374,7 +374,7 @@ fn test_evm_staticcall() {
                 &A_act,
                 &A_robust_addr,
                 &TokenAmount::zero(),
-                fil_actor_evm::Method::InvokeContract as u64,
+                test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                 Some(ContractParams(params.to_vec())),
             )
             .unwrap();
@@ -402,7 +402,7 @@ fn test_evm_staticcall() {
                 &A_act,
                 &A_robust_addr,
                 &TokenAmount::zero(),
-                fil_actor_evm::Method::InvokeContract as u64,
+                test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                 Some(ContractParams(params.to_vec())),
             )
             .unwrap();
@@ -425,7 +425,7 @@ fn test_evm_staticcall() {
                 &A_act,
                 &A_robust_addr,
                 &TokenAmount::zero(),
-                fil_actor_evm::Method::InvokeContract as u64,
+                test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                 Some(ContractParams(params.to_vec())),
             )
             .unwrap();
@@ -455,7 +455,7 @@ fn test_evm_staticcall() {
                 &A_act,
                 &A_robust_addr,
                 &TokenAmount::zero(),
-                fil_actor_evm::Method::InvokeContract as u64,
+                test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                 Some(ContractParams(params.to_vec())),
             )
             .unwrap();
@@ -490,7 +490,7 @@ fn test_evm_delegatecall() {
                     account,
                     &EAM_ACTOR_ADDR,
                     &TokenAmount::zero(),
-                    fil_actor_eam::Method::CreateExternal as u64,
+                    test_vm::Entrypoint::Invoke(fil_actor_eam::Method::CreateExternal as u64),
                     Some(fil_actor_eam::CreateExternalParams(bytecode.clone())),
                 )
                 .unwrap();
@@ -528,7 +528,7 @@ fn test_evm_delegatecall() {
                 &A_act,
                 &A_robust_addr,
                 &TokenAmount::zero(),
-                fil_actor_evm::Method::InvokeContract as u64,
+                test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                 Some(ContractParams(params.to_vec())),
             )
             .unwrap();
@@ -556,7 +556,7 @@ fn test_evm_delegatecall() {
                 &A_act,
                 &A_robust_addr,
                 &TokenAmount::zero(),
-                fil_actor_evm::Method::InvokeContract as u64,
+                test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                 Some(ContractParams(params.to_vec())),
             )
             .unwrap();
@@ -586,7 +586,7 @@ fn test_evm_delegatecall() {
                 &A_act,
                 &A_robust_addr,
                 &value,
-                fil_actor_evm::Method::InvokeContract as u64,
+                test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                 Some(ContractParams(params.to_vec())),
             )
             .unwrap();
@@ -628,7 +628,7 @@ fn test_evm_staticcall_delegatecall() {
                     account,
                     &EAM_ACTOR_ADDR,
                     &TokenAmount::zero(),
-                    fil_actor_eam::Method::CreateExternal as u64,
+                    test_vm::Entrypoint::Invoke(fil_actor_eam::Method::CreateExternal as u64),
                     Some(fil_actor_eam::CreateExternalParams(bytecode.clone())),
                 )
                 .unwrap();
@@ -668,7 +668,7 @@ fn test_evm_staticcall_delegatecall() {
                 &A_act,
                 &A_robust_addr,
                 &TokenAmount::zero(),
-                fil_actor_evm::Method::InvokeContract as u64,
+                test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                 Some(ContractParams(params.to_vec())),
             )
             .unwrap();
@@ -699,7 +699,7 @@ fn test_evm_staticcall_delegatecall() {
                 &A_act,
                 &A_robust_addr,
                 &TokenAmount::zero(),
-                fil_actor_evm::Method::InvokeContract as u64,
+                test_vm::Entrypoint::Invoke(fil_actor_evm::Method::InvokeContract as u64),
                 Some(ContractParams(params.to_vec())),
             )
             .unwrap();
@@ -718,7 +718,7 @@ fn test_evm_init_revert_data() {
             &account,
             &EAM_ACTOR_ADDR,
             &TokenAmount::zero(),
-            fil_actor_eam::Method::CreateExternal as u64,
+            test_vm::Entrypoint::Invoke(fil_actor_eam::Method::CreateExternal as u64),
             // init code:
             // PUSH1 0x42; PUSH1 0x0; MSTORE;
             // PUSH1 0x20; PUSH1 0x0; REVERT

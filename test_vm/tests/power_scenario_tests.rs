@@ -23,7 +23,7 @@ use num_traits::Zero;
 use test_vm::util::{
     apply_ok, create_accounts, create_miner, invariant_failure_patterns, miner_dline_info,
 };
-use test_vm::{ExpectInvocation, TestVM, FIRST_TEST_USER_ADDR, TEST_FAUCET_ADDR, VM};
+use test_vm::{Entrypoint, ExpectInvocation, TestVM, FIRST_TEST_USER_ADDR, TEST_FAUCET_ADDR, VM};
 
 #[test]
 fn create_miner_test() {
@@ -62,18 +62,18 @@ fn create_miner_test() {
     let expect = ExpectInvocation {
         // send to power actor
         to: STORAGE_POWER_ACTOR_ADDR,
-        method: PowerMethod::CreateMiner as u64,
+        entrypoint: Entrypoint::Invoke(PowerMethod::CreateMiner as u64),
         params: Some(IpldBlock::serialize_cbor(&params).unwrap()),
         ret: Some(res.ret),
         subinvocs: Some(vec![
             // request init actor construct miner
             ExpectInvocation {
                 to: INIT_ACTOR_ADDR,
-                method: InitMethod::Exec as u64,
+                entrypoint: Entrypoint::Invoke(InitMethod::Exec as u64),
                 subinvocs: Some(vec![ExpectInvocation {
                     // init then calls miner constructor
                     to: Address::new_id(FIRST_TEST_USER_ADDR + 1),
-                    method: MinerMethod::Constructor as u64,
+                    entrypoint: Entrypoint::Create,
                     params: Some(
                         IpldBlock::serialize_cbor(&MinerConstructorParams {
                             owner,
@@ -158,18 +158,18 @@ fn test_cron_tick() {
     ExpectInvocation {
         // original send to storage power actor
         to: STORAGE_POWER_ACTOR_ADDR,
-        method: PowerMethod::OnEpochTickEnd as u64,
+        entrypoint: PowerMethod::OnEpochTickEnd as u64,
         subinvocs: Some(vec![
             // get data from reward actor for any eventual calls to confirmsectorproofsparams
             ExpectInvocation {
                 to: REWARD_ACTOR_ADDR,
-                method: RewardMethod::ThisEpochReward as u64,
+                entrypoint: RewardMethod::ThisEpochReward as u64,
                 ..Default::default()
             },
             // expect call to reward to update kpi
             ExpectInvocation {
                 to: REWARD_ACTOR_ADDR,
-                method: RewardMethod::UpdateNetworkKPI as u64,
+                entrypoint: RewardMethod::UpdateNetworkKPI as u64,
                 from: Some(STORAGE_POWER_ACTOR_ADDR),
                 ..Default::default()
             },
@@ -195,13 +195,13 @@ fn test_cron_tick() {
         // get data from reward and power for any eventual calls to confirmsectorproofsvalid
         ExpectInvocation {
             to: REWARD_ACTOR_ADDR,
-            method: RewardMethod::ThisEpochReward as u64,
+            entrypoint: RewardMethod::ThisEpochReward as u64,
             ..Default::default()
         },
         // expect call back to miner that was set up in create miner
         ExpectInvocation {
             to: id_addr,
-            method: MinerMethod::OnDeferredCronEvent as u64,
+            entrypoint: MinerMethod::OnDeferredCronEvent as u64,
             from: Some(STORAGE_POWER_ACTOR_ADDR),
             value: Some(TokenAmount::zero()),
             ..Default::default()
@@ -209,7 +209,7 @@ fn test_cron_tick() {
         // expect call to reward to update kpi
         ExpectInvocation {
             to: REWARD_ACTOR_ADDR,
-            method: RewardMethod::UpdateNetworkKPI as u64,
+            entrypoint: RewardMethod::UpdateNetworkKPI as u64,
             from: Some(STORAGE_POWER_ACTOR_ADDR),
             ..Default::default()
         },
@@ -219,7 +219,7 @@ fn test_cron_tick() {
     ExpectInvocation {
         // original send to storage power actor
         to: STORAGE_POWER_ACTOR_ADDR,
-        method: PowerMethod::OnEpochTickEnd as u64,
+        entrypoint: PowerMethod::OnEpochTickEnd as u64,
         subinvocs: Some(sub_invocs),
         ..Default::default()
     }

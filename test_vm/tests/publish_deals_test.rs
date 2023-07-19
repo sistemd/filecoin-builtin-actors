@@ -536,26 +536,26 @@ fn psd_bad_sig() {
 
     ExpectInvocation {
         to: STORAGE_MARKET_ACTOR_ADDR,
-        method: MarketMethod::PublishStorageDeals as u64,
+        entrypoint: MarketMethod::PublishStorageDeals as u64,
         subinvocs: Some(vec![
             ExpectInvocation {
                 to: a.maddr,
-                method: MinerMethod::IsControllingAddressExported as u64,
+                entrypoint: MinerMethod::IsControllingAddressExported as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: REWARD_ACTOR_ADDR,
-                method: RewardMethod::ThisEpochReward as u64,
+                entrypoint: RewardMethod::ThisEpochReward as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: STORAGE_POWER_ACTOR_ADDR,
-                method: PowerMethod::CurrentTotalPower as u64,
+                entrypoint: PowerMethod::CurrentTotalPower as u64,
                 ..Default::default()
             },
             ExpectInvocation {
                 to: a.client1,
-                method: AccountMethod::AuthenticateMessageExported as u64,
+                entrypoint: AccountMethod::AuthenticateMessageExported as u64,
                 params: Some(
                     IpldBlock::serialize_cbor(&AuthenticateMessageParams {
                         signature: invalid_sig_bytes,
