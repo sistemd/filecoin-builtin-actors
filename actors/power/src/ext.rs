@@ -75,7 +75,7 @@ pub mod reward {
     #[derive(FromPrimitive)]
     #[repr(u64)]
     pub enum Method {
-        Constructor = METHOD_CONSTRUCTOR,
+        
         AwardBlockReward = 2,
         ThisEpochReward = 3,
         UpdateNetworkKPI = 4,

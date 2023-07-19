@@ -69,7 +69,7 @@ pub const EX_DEAL_EXPIRED: ExitCode = ExitCode::new(FIRST_ACTOR_SPECIFIC_EXIT_CO
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
     AddBalance = 2,
     WithdrawBalance = 3,
     PublishStorageDeals = 4,

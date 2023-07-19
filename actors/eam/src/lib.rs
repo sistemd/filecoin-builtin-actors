@@ -33,7 +33,7 @@ fil_actors_runtime::wasm_trampoline!(EamActor);
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
     Create = 2,
     Create2 = 3,
     CreateExternal = 4,

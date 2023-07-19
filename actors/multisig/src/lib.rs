@@ -37,7 +37,7 @@ mod types;
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
     Propose = 2,
     Approve = 3,
     Cancel = 4,

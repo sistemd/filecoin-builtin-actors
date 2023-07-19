@@ -36,7 +36,7 @@ mod types;
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
     UpdateChannelState = 2,
     Settle = 3,
     Collect = 4,

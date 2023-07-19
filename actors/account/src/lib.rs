@@ -30,7 +30,7 @@ fil_actors_runtime::wasm_trampoline!(Actor);
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
     PubkeyAddress = 2,
     // Deprecated in v10
     // AuthenticateMessage = 3,

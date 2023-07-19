@@ -96,7 +96,7 @@ mod vesting_state;
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
     ControlAddresses = 2,
     ChangeWorkerAddress = 3,
     ChangePeerID = 4,

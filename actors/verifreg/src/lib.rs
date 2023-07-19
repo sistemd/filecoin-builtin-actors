@@ -52,7 +52,7 @@ pub mod types;
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
     AddVerifier = 2,
     RemoveVerifier = 3,
     AddVerifiedClient = 4,

@@ -18,7 +18,7 @@ fil_actors_runtime::wasm_trampoline!(EthAccountActor);
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
 }
 
 /// Ethereum Account actor.

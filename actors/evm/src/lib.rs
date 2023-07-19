@@ -59,7 +59,7 @@ fn test_method_selector() {
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
     Resurrect = 2,
     GetBytecode = 3,
     GetBytecodeHash = 4,

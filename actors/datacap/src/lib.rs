@@ -50,7 +50,7 @@ lazy_static! {
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
     // Deprecated in v10
     // Mint = 2,
     // Destroy = 3,

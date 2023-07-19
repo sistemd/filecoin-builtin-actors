@@ -28,7 +28,7 @@ fil_actors_runtime::wasm_trampoline!(Actor);
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
     Exec = 2,
     Exec4 = 3,
     #[cfg(feature = "m2-native")]

@@ -53,7 +53,7 @@ pub mod detail {
 #[repr(u64)]
 pub enum Method {
     /// Constructor for Storage Power Actor
-    Constructor = METHOD_CONSTRUCTOR,
+    
     CreateMiner = 2,
     UpdateClaimedPower = 3,
     EnrollCronEvent = 4,

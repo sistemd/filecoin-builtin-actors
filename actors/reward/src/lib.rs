@@ -40,7 +40,7 @@ pub const PENALTY_MULTIPLIER: u64 = 3;
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    Constructor = METHOD_CONSTRUCTOR,
+    
     AwardBlockReward = 2,
     ThisEpochReward = 3,
     UpdateNetworkKPI = 4,
