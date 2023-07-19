@@ -12,6 +12,8 @@ pub trait ActorCode {
     type Methods;
     /// A name for the actor type, used in debugging.
     fn name() -> &'static str;
+
+    // TODO Document
     fn create<RT>(rt: &RT, params: Option<IpldBlock>) -> Result<Option<IpldBlock>, ActorError>
     where
         // TODO Revisit this
@@ -20,6 +22,7 @@ pub trait ActorCode {
         // https://github.com/filecoin-project/builtin-actors/issues/133
         RT: Runtime,
         RT::Blockstore: Blockstore + Clone;
+
     /// Invokes method with runtime on the actor's code. Method number will match one
     /// defined by the Actor, and parameters will be serialized and used in execution
     fn invoke<RT>(

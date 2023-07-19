@@ -568,22 +568,25 @@ where
 /// 4.  Invokes the target method.
 /// 5a. In case of error, aborts the execution with the emitted exit code, or
 /// 5b. In case of success, stores the return data as a block and returns the latter.
-// TODO This needs to change so I can use it with both invoke and create. I should probably make
-// this accept a closure and then call the let method = and let params = part myself.
-pub fn trampoline<C: ActorCode>(params: u32) -> u32 {
+pub fn trampoline<C: ActorCode>(params: u32, entrypoint: Entrypoint) -> u32 {
     init_logging(C::name());
 
     std::panic::set_hook(Box::new(|info| {
         fvm::vm::abort(ExitCode::USR_ASSERTION_FAILED.value(), Some(&format!("{}", info)))
     }));
 
-    let method = fvm::message::method_number();
-    let params = fvm::message::params_raw(params).expect("params block invalid");
-
     // Construct a new runtime.
     let rt = FvmRuntime::default();
-    // Invoke the method, aborting if the actor returns an errored exit code.
-    let ret = C::invoke(&rt, method, params).unwrap_or_else(|mut err| {
+    let params = fvm_sdk::message::params_raw(params).expect("params block invalid");
+    // Invoke the entrypoint, aborting if the actor returns an errored exit code.
+    let ret = match entrypoint {
+        Entrypoint::Create => C::create(&rt, params),
+        Entrypoint::Invoke => {
+            let method = fvm_sdk::message::method_number();
+            C::invoke(&rt, method, params)
+        }
+    }
+    .unwrap_or_else(|mut err| {
         fvm::vm::exit(err.exit_code().value(), err.take_data(), Some(err.msg()))
     });
 
@@ -600,6 +603,12 @@ pub fn trampoline<C: ActorCode>(params: u32) -> u32 {
         Some(ret_block) => fvm::ipld::put_block(ret_block.codec, ret_block.data.as_slice())
             .expect("failed to write result"),
     }
+}
+
+#[derive(Debug)]
+pub enum Entrypoint {
+    Create,
+    Invoke,
 }
 
 /// If debugging is enabled in the VM, installs a logger that sends messages to the FVM log syscall.

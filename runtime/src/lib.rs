@@ -39,8 +39,19 @@ pub mod test_utils;
 macro_rules! wasm_trampoline {
     ($target:ty) => {
         #[no_mangle]
+        pub extern "C" fn create(param: u32) -> u32 {
+            $crate::runtime::fvm::trampoline::<$target>(
+                param,
+                $crate::runtime::fvm::Entrypoint::Create,
+            )
+        }
+
+        #[no_mangle]
         pub extern "C" fn invoke(param: u32) -> u32 {
-            $crate::runtime::fvm::trampoline::<$target>(param)
+            $crate::runtime::fvm::trampoline::<$target>(
+                param,
+                $crate::runtime::fvm::Entrypoint::Invoke,
+            )
         }
     };
 }
