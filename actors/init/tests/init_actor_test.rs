@@ -415,9 +415,7 @@ fn construct_and_verify(rt: &MockRuntime) {
     rt.set_caller(*SYSTEM_ACTOR_CODE_ID, SYSTEM_ACTOR_ADDR);
     rt.expect_validate_caller_addr(vec![SYSTEM_ACTOR_ADDR]);
     let params = ConstructorParams { network_name: "mock".to_string() };
-    let ret = rt
-        .call::<InitActor>(METHOD_CONSTRUCTOR, IpldBlock::serialize_cbor(&params).unwrap())
-        .unwrap();
+    let ret = rt.construct::<InitActor>(IpldBlock::serialize_cbor(&params).unwrap()).unwrap();
 
     assert!(ret.is_none());
 

@@ -146,3 +146,6 @@ impl Keyer for &str {
         BytesKey(self.as_bytes().to_owned())
     }
 }
+
+/// A type which can never be constructed.
+pub enum Never {}

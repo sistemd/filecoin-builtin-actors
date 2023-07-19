@@ -543,6 +543,21 @@ impl<BS: Blockstore> MockRuntime<BS> {
         self.id_addresses.borrow_mut().insert(target, Address::new_id(source));
     }
 
+    pub fn construct<A: ActorCode>(
+        &self,
+        params: Option<IpldBlock>,
+    ) -> Result<Option<IpldBlock>, ActorError> {
+        self.in_call.replace(true);
+        let prev_state = *self.state.borrow();
+        let res = A::create(self, params);
+
+        if res.is_err() {
+            self.state.replace(prev_state);
+        }
+        self.in_call.replace(false);
+        res
+    }
+
     pub fn call<A: ActorCode>(
         &self,
         method_num: MethodNum,

@@ -10,6 +10,7 @@ use crate::{ActorError, Runtime};
 /// Interface for invoking methods on an Actor
 pub trait ActorCode {
     type Methods;
+
     /// A name for the actor type, used in debugging.
     fn name() -> &'static str;
 

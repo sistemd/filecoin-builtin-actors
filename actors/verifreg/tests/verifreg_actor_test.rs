@@ -31,9 +31,8 @@ mod util {
 mod construction {
     use fvm_shared::address::{Address, BLS_PUB_LEN};
     use fvm_shared::error::ExitCode;
-    use fvm_shared::MethodNum;
 
-    use fil_actor_verifreg::{Actor as VerifregActor, Method};
+    use fil_actor_verifreg::Actor as VerifregActor;
     use fil_actors_runtime::test_utils::*;
     use fil_actors_runtime::SYSTEM_ACTOR_ADDR;
     use fvm_ipld_encoding::ipld_block::IpldBlock;
@@ -68,10 +67,7 @@ mod construction {
         rt.expect_validate_caller_addr(vec![SYSTEM_ACTOR_ADDR]);
         expect_abort(
             ExitCode::USR_ILLEGAL_ARGUMENT,
-            rt.call::<VerifregActor>(
-                Method::Constructor as MethodNum,
-                IpldBlock::serialize_cbor(&root_pubkey).unwrap(),
-            ),
+            rt.construct::<VerifregActor>(IpldBlock::serialize_cbor(&root_pubkey).unwrap()),
         );
     }
 }

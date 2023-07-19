@@ -23,7 +23,7 @@ use fvm_shared::randomness::*;
 use fvm_shared::reward::ThisEpochRewardReturn;
 use fvm_shared::sector::*;
 use fvm_shared::smooth::FilterEstimate;
-use fvm_shared::{ActorID, METHOD_CONSTRUCTOR, METHOD_SEND};
+use fvm_shared::{ActorID, METHOD_SEND};
 use itertools::Itertools;
 use log::{error, info, warn};
 use multihash::Code::Blake2b256;
@@ -96,7 +96,6 @@ mod vesting_state;
 #[derive(FromPrimitive)]
 #[repr(u64)]
 pub enum Method {
-    
     ControlAddresses = 2,
     ChangeWorkerAddress = 3,
     ChangePeerID = 4,
@@ -4996,7 +4995,6 @@ impl ActorCode for Actor {
     }
 
     actor_dispatch! {
-        Constructor => constructor,
         ControlAddresses => control_addresses,
         ChangeWorkerAddress|ChangeWorkerAddressExported => change_worker_address,
         ChangePeerID|ChangePeerIDExported => change_peer_id,
